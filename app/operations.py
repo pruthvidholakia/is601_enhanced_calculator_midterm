@@ -1,111 +1,89 @@
+from __future__ import annotations
 
 from decimal import Decimal
+from operator import add, sub, mul, mod, floordiv, pow as _pow
+
 from app.exceptions import ValidationError, OperationError
 
 
-# ──────────────────────────── Base Class ────────────────────────────
+# ───────────────────────────── Base Class ─────────────────────────────
 class Operation:
-    """Abstract base class – every concrete operation implements `apply`."""
-
+    """Abstract product for the Factory"""
     def apply(self, a: Decimal, b: Decimal | None = None) -> Decimal:  # pragma: no cover
-        raise NotImplementedError("Each operation must override `apply`")
+        raise NotImplementedError
 
-    # shared numeric validator
+
+# ──────────────────────── Helper: runtime product ─────────────────────
+class _BinaryOperation(Operation):
+    """
+    Wrap a simple 2-arg callable so we don’t need a separate
+    subclass for every arithmetic operator.
+    """
+
+    __slots__ = ("_fn", "_name")
+
+    def __init__(self, fn, name: str):
+        self._fn = fn
+        self._name = name
+
     @staticmethod
-    def _num(val):
-        if not isinstance(val, (int, float, Decimal)):
-            raise ValidationError(f"Value {val!r} is not numeric")
-        return Decimal(val)
+    def _num(x):
+        if not isinstance(x, (int, float, Decimal)):
+            raise ValidationError(f"Non-numeric input: {x!r}")
+        return Decimal(x)
 
-
-# ───────────────────────── Concrete Operations ──────────────────────
-class Add(Operation):
     def apply(self, a, b):  # type: ignore[override]
-        return self._num(a) + self._num(b)
+        return self._fn(self._num(a), self._num(b))
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<{self._name}>"
 
 
-class Subtract(Operation):
-    def apply(self, a, b):  # type: ignore[override]
-        return self._num(a) - self._num(b)
+# ─────────────────────────── Implementations ──────────────────────────
+def _safe_div(a: Decimal, b: Decimal) -> Decimal:
+    if b == 0:
+        raise ValidationError("Division by zero")
+    return a / b
 
 
-class Multiply(Operation):
-    def apply(self, a, b):  # type: ignore[override]
-        return self._num(a) * self._num(b)
+def _safe_floor_div(a: Decimal, b: Decimal) -> Decimal:
+    if b == 0:
+        raise ValidationError("Division by zero")
+    return a // b
 
 
-class Divide(Operation):
-    def apply(self, a, b):  # type: ignore[override]
-        divisor = self._num(b)
-        if divisor == 0:
-            raise ValidationError("Division by zero is not allowed")
-        return self._num(a) / divisor
+def _root(a: Decimal, n: Decimal) -> Decimal:
+    if n == 0:
+        raise ValidationError("Root degree cannot be zero")
+    return a ** (Decimal(1) / n)
 
 
-class Power(Operation):
-    def apply(self, a, b):  # type: ignore[override]
-        return self._num(a) ** self._num(b)
+def _percent(a: Decimal, b: Decimal) -> Decimal:
+    return (a / b) * 100
 
 
-class Root(Operation):
-    def apply(self, a, b):  # type: ignore[override]
-        degree = self._num(b)
-        if degree == 0:
-            raise ValidationError("Root degree cannot be zero")
-        return self._num(a) ** (Decimal(1) / degree)
+def _abs_diff(a: Decimal, b: Decimal) -> Decimal:
+    return abs(a - b)
 
 
-class Modulus(Operation):
-    def apply(self, a, b):  # type: ignore[override]
-        return self._num(a) % self._num(b)
-
-
-class IntDivide(Operation):
-    def apply(self, a, b):  # type: ignore[override]
-        divisor = self._num(b)
-        if divisor == 0:
-            raise ValidationError("Division by zero is not allowed")
-        return self._num(a) // divisor
-
-
-class Percent(Operation):
-    def apply(self, a, b):  # type: ignore[override]
-        return (self._num(a) / self._num(b)) * 100
-
-
-class AbsDiff(Operation):
-    def apply(self, a, b):  # type: ignore[override]
-        return abs(self._num(a) - self._num(b))
-
-
-# ───────────────────────────── Factory ──────────────────────────────
-_OPERATION_MAP: dict[str, type[Operation]] = {
-    "add": Add,
-    "subtract": Subtract,
-    "multiply": Multiply,
-    "divide": Divide,
-    "power": Power,
-    "root": Root,
-    "modulus": Modulus,
-    "int_divide": IntDivide,
-    "percent": Percent,
-    "abs_diff": AbsDiff,
+# ───────────────────────────── Operation Map ──────────────────────────
+_OP_FUNCS: dict[str, callable] = {
+    "add": add,
+    "subtract": sub,
+    "multiply": mul,
+    "divide": _safe_div,
+    "power": _pow,
+    "root": _root,
+    "modulus": mod,
+    "int_divide": _safe_floor_div,
+    "percent": _percent,
+    "abs_diff": _abs_diff,
 }
 
 
+# ───────────────────────────── Factory ────────────────────────────────
 def get_operation(name: str) -> Operation:
-    """
-    Return an `Operation` instance for *name*.
-
-    Raises
-    ------
-    OperationError
-        If *name* is not registered in `_OPERATION_MAP`.
-    """
-    cls = _OPERATION_MAP.get(name.lower())
-    if cls is None:
-        raise OperationError(
-            f"Unknown operation '{name}'. "
-            f"Available: {', '.join(sorted(_OPERATION_MAP))}"
-        )
-    return cls()
+    try:
+        return _BinaryOperation(_OP_FUNCS[name.lower()], name)
+    except KeyError:
+        raise OperationError(f"Unknown operation '{name}'")
