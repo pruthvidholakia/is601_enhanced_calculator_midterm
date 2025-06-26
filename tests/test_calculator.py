@@ -8,7 +8,7 @@ import logging
 import pandas as pd
 import pytest
 
-from app.calculator import Calculator, LoggingObserver, AutoSaveObserver
+from app.calculator import Calculator, Observer, LoggingObserver, AutoSaveObserver
 from app.exceptions import ValidationError, OperationError
 
 
@@ -126,3 +126,25 @@ def test_logging_and_autosave(tmp_path: Path):
     calc2.load_history(csv_file)
     assert len(calc2.history) == 1
     assert calc2.history[0][0] == "add"
+    
+def test_load_history_when_file_missing(tmp_path):
+    calc = Calculator()
+    csv_file = tmp_path / "does_not_exist.csv"
+    # No exception should be raised
+    calc.load_history(csv_file)
+    assert calc.history == []           # still empty
+
+
+def test_observer_exception_does_not_break_flow(monkeypatch):
+    """Trigger the except branch inside _notify()."""
+
+    class BadObserver(Observer):        # type: ignore[misc]
+        def update(self, _c, _i):
+            raise RuntimeError("boom")
+
+    calc = Calculator()
+    calc.add_observer(BadObserver())    # attach faulty observer
+
+    # Must not raise, history still updated
+    calc.calculate("add", Decimal(1), Decimal(1))
+    assert len(calc.history) == 1
