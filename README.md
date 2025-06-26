@@ -1,59 +1,50 @@
-# 🧮 Advanced Python Calculator – Midterm Project
+# Advanced Python Calculator – Midterm Project
 
-## 📘 Overview
+## Overview
 
-This project is a modular, extensible, and fully testable **command-line calculator** written in Python. It supports multiple arithmetic operations, complete **undo/redo history management**, **logging**, **auto-saving**, and integrates **Factory**, **Memento**, and **Observer** design patterns. The application includes **CI/CD pipeline via GitHub Actions** and achieves **>95% test coverage** with `pytest`.
+This project is an advanced calculator application developed in Python. It supports various mathematical operations and includes features such as command history management, dynamic plugin architecture, and data analysis capabilities using the Pandas library. The application provides a user-friendly REPL (Read-Eval-Print Loop) interface for interactive calculations.
+
+## Features
+Basic Operations: Perform addition, subtraction, multiplication, and division.
+Statistical Functions: Calculate mean, median, and standard deviation.
+History Management: Track and display the history of executed commands.
+Dynamic Plugins: Utilize an extensible architecture for adding new commands seamlessly.
+Data Handling: Leverage the Pandas library for effective command history management and analysis.
+Comprehensive Testing: Implement unit tests to ensure functionality and reliability.
 
 ---
 
 ## Features
 
-- ✅ **Basic Operations**: add, subtract, multiply, divide  
-- ✅ **Advanced Operations**: power, root, modulus, int divide, percent, abs diff  
-- ✅ **Undo/Redo Functionality** using Memento pattern  
-- ✅ **Auto-Save** to CSV using pandas  
-- ✅ **Real-time Logging** to log file  
-- ✅ **Environment-based configuration** via `.env`  
-- ✅ **Command-line Interface (REPL)**  
-- ✅ **CI/CD pipeline** with test coverage enforcement  
-- ✅ **Custom error handling** and input validation  
+-  **Basic Operations**: add, subtract, multiply, divide  
+-  **Advanced Operations**: power, root, modulus, int divide, percent, abs diff  
+-  **Undo/Redo Functionality** using Memento pattern  
+-  **Auto-Save** to CSV using pandas  
+-  **Real-time Logging** to log file  
+-  **Environment-based configuration** via `.env`  
+-  **Command-line Interface (REPL)**  
+-  **CI/CD pipeline** with test coverage enforcement  
+-  **Custom error handling** and input validation  
 
 ---
 
-## 🏗️ Directory Structure
-
-project_root/
-├── app/
-│ ├── calculator.py
-│ ├── calculator_config.py
-│ ├── calculator_memento.py
-│ ├── exceptions.py
-│ ├── operations.py
-│ ├── init.py
-├── tests/
-│ ├── test_calculator.py
-│ ├── test_operations.py
-│ ├── test_calculator_config.py
-│ └── init.py
-├── main.py
-├── .env
-├── requirements.txt
-├── README.md
-└── .github/workflows/python-app.yml
 
 ## 🔧 Installation
 
 1. **Clone the repository**
 
-```bash
-git clone https://github.com/your-username/advanced-calculator.git
-cd advanced-calculator
+    ```bash
+    git clone https://github.com/your-username/is601_enhanced_calculator_midterm.git
+    cd is601_enhanced_calculator_midterm
+    ```
 
 
 2. **Create virtual environment**
 
-python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate  # Windows: venv\Scripts\activate
+    ```
 
 
 3. **Install dependencies**
