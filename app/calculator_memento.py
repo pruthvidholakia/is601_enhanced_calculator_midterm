@@ -46,3 +46,8 @@ class CalculatorCaretaker:
     # --- public inspection (optional) --------------------------------
     def can_undo(self) -> bool: return bool(self._undo)
     def can_redo(self) -> bool: return bool(self._redo)
+    
+        # --- push WITHOUT clearing redo (for redo operation itself) ----------
+    def push_undo_preserve_redo(self, m: CalculatorMemento) -> None:
+        self._undo.append(m)
+    
