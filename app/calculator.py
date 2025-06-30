@@ -5,6 +5,7 @@ from decimal import Decimal, ROUND_HALF_UP, getcontext
 from datetime import datetime
 from pathlib import Path
 from typing import List, Protocol
+import pandas as pd
 
 from app.operations import get_operation
 from app.calculator_config import CONFIG
@@ -125,7 +126,6 @@ class Calculator:
                                   encoding=CONFIG.default_encoding)
 
     def load_history(self, path: Path | str | None = None) -> None:
-        import pandas as pd
         target = Path(path or CONFIG.history_file)
         if not target.exists():
             return # pragma: no cover
